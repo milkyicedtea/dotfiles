@@ -1,0 +1,13 @@
+export EDITOR=micro
+export MICRO_LSP='go=gopls,'
+
+export GPG_TTY=$(tty)
+
+# export SDL_VIDEODRIVER=wayland
+export OSU_SDL3=1
+
+# go installed binaries
+export PATH=$PATH:$HOME/go/bin
+
+# bun globally installed binaries
+export PATH="/home/cheek/.bun/bin:$PATH"

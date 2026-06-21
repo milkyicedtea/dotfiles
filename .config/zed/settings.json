@@ -1,0 +1,68 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "ssh_connections": [
+    {
+      "host": "89.168.20.93",
+      "username": "ubuntu",
+      "args": ["-i", "/home/cheek/.ssh/arch-oracle-2026"],
+      "projects": [
+        {
+          "paths": ["/home/ubuntu/containers/proxy-rs/./"],
+        },
+      ],
+    },
+  ],
+  "vim_mode": false,
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Catppuccin Mocha",
+  },
+  "base_keymap": "VSCode",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "One Dark",
+  },
+
+  "autosave": { "after_delay": { "milliseconds": 250 } },
+
+  "tab_size": 2,
+  "languages": {
+    "Python": {
+      "tab_size": 4,
+    },
+    "Rust": {
+      "tab_size": 4,
+    },
+    "Go": {
+      "tab_size": 4,
+    },
+  },
+}

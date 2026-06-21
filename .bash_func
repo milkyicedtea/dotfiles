@@ -1,0 +1,86 @@
+llm-use() {
+  command -v jq >/dev/null || {
+    echo "Error: jq is not installed. Install it with: sudo pacman -S jq"
+    return 1
+  }
+
+  MODEL_KEY="$1"
+  CONFIG="$HOME/.config/llm/models.json"
+
+  [ -z "$MODEL_KEY" ] && {
+    echo "Usage: llm-use <model>"
+    return 1
+  }
+
+  MODEL_PATH=$(jq -r ".models[\"$MODEL_KEY\"].path // empty" "$CONFIG")
+  PORT=$(jq -r ".models[\"$MODEL_KEY\"].port // empty" "$CONFIG")
+
+  if [ -z "$MODEL_PATH" ] || [ -z "$PORT" ]; then
+    echo "Error: model '$MODEL_KEY' not found in config"
+    return 1
+  fi
+
+  CTX=$(jq -r ".defaults.ctx_size" "$CONFIG")
+  GPU=$(jq -r ".defaults.gpu_layers" "$CONFIG")
+  THREADS=$(jq -r ".defaults.threads" "$CONFIG")
+  BATCH=$(jq -r ".defaults.batch" "$CONFIG")
+  UBATCH=$(jq -r ".defaults.ubatch" "$CONFIG")
+
+  echo "Starting $MODEL_KEY on port $PORT..."
+
+  pkill -f llama-server 2>/dev/null
+
+  llama-server \
+    -m "$MODEL_PATH" \
+    --ctx-size "$CTX" \
+    --n-gpu-layers "$GPU" \
+    --batch-size "$BATCH" \
+    --ubatch-size "$UBATCH" \
+    --threads "$THREADS" \
+    --threads-batch "$THREADS" \
+    --flash-attn on \
+    --no-mmap \
+    --cache-type-k q4_0 \
+    --cache-type-v q4_0 \
+    --host 0.0.0.0 \
+    --port "$PORT"
+
+  llm-update-crush "$MODEL_KEY"
+}
+
+llm-update-crush() {
+  MODEL_KEY="$1"
+  CONFIG="$HOME/.config/llm/models.json"
+  CRUSH="$HOME/.config/crush/crush.json"
+
+  NAME=$(jq -r ".models[\"$MODEL_KEY\"].name" "$CONFIG")
+  PORT=$(jq -r ".models[\"$MODEL_KEY\"].port" "$CONFIG")
+
+  # If file doesn't exist, create base
+  if [ ! -f "$CRUSH" ]; then
+    echo '{"providers":{}}' > "$CRUSH"
+  fi
+
+  # Use jq to safely update only the local provider
+  tmp=$(mktemp)
+
+  jq \
+    --arg name "$NAME" \
+    --arg id "$MODEL_KEY" \
+    --arg port "$PORT" \
+    '
+    .providers.local = {
+      name: "Local LLM",
+      base_url: ("http://localhost:" + $port),
+      type: "openai",
+      models: [
+        {
+          name: $name,
+          id: $id
+        }
+      ]
+    }
+    ' "$CRUSH" > "$tmp" && mv "$tmp" "$CRUSH"
+
+  echo "Updated crush.json → $NAME on port $PORT"
+}
