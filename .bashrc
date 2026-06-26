@@ -24,6 +24,11 @@
 
 
 #
+## XPipe / Wezterm no color fix
+#
+[ -z "$SSH_CONNECTION" ] && unset NO_COLOR
+
+#
 ## Ported from preferred debian install
 #
 HISTORYCONTROL=ignoreboth
